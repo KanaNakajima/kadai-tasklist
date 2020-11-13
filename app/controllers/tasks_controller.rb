@@ -1,16 +1,18 @@
 class TasksController < ApplicationController
-  before_action :require_user_logged_in
+  before_action :require_user_logged_in, only: [:index, :show, :edit, :destroy]
   before_action :correct_user, only: [:show, :edit, :destroy]
   
   def index
-    if logged_in?
       @task = current_user.tasks.build  # form_with用
       @tasks = current_user.tasks.order(id: :desc).page(params[:page])
-    end
   end
 
   def show
      @task = Task.find(params[:id])
+  end
+  
+  def new
+    @task = Task.new
   end
   
   def edit
@@ -30,10 +32,6 @@ class TasksController < ApplicationController
      end
   end
 
-  def new
-    @task = Task.new
-  end
-
   def create
     @task = current_user.tasks.build(task_params)
     if @task.save
@@ -42,7 +40,7 @@ class TasksController < ApplicationController
     else
       @tasks = current_user.tasks.order(id: :desc).page(params[:page])
       flash.now[:danger] = 'タスクの作成に失敗しました。'
-      render action: :index
+      render  'tasks/new'              #action: :index
     end
   end
 
@@ -57,7 +55,6 @@ class TasksController < ApplicationController
   private
 
   def task_params
-    
     params.require(:task).permit(:status,:content)
   end
 
